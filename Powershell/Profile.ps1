@@ -74,7 +74,7 @@ $maxWS = $host.UI.RawUI.Get_MaxWindowSize()
  $host.ui.RawUI.Set_WindowSize($ws)
 [console]::BufferHeight=3000
 [console]::BufferWidth=120
-[console]::Title="Blackline Custom Engineering Monster Shell"
+[console]::Title="Custom Engineering Monster Shell"
 
                 # *** END OF SHELL CUSTOMIZATION *** #
 
