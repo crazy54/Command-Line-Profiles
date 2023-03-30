@@ -1,4 +1,4 @@
-# JHall's Blackline Engineering Monster Shell
+# JHall's Engineering Monster Shell
 <p style="text-align: center;"> ** Use this Profile to Up Your Game! ** </p>
 
 **Abstract:** This is just my Powershell profile that I have been using on and off for the last few years. It contains lots of helpful Functions to help make your life easier.  Most all of the functions have their help in the .ps1 so you may have to open it to get the syntax.
