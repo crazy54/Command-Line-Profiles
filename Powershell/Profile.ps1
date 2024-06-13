@@ -1,90 +1,45 @@
 ####Jeremy Hall's Powershell Profile####
 ########################################
-	# Insert Aero Code to Look Pretty #
-		#  requires -version 2!!!! #
+Write-Output 'Just Loading Some Stuff in the Background...'
+# Import AWS PSModule
+Import-Module "C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowerShell.psd1"
 
-add-type -namespace Hacks -name Aero -memberdefinition @"
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct MARGINS
-   {
-       public int left;
-       public int right;
-       public int top;
-       public int bottom;
-    }
-
-    [DllImport("dwmapi.dll", PreserveSig = false)]
-    public static extern void DwmExtendFrameIntoClientArea(IntPtr hwnd, ref MARGINS margins);
-
-   [DllImport("dwmapi.dll", PreserveSig = false)]
-    public static extern bool DwmIsCompositionEnabled();
-"@
-
-if (([Environment]::OSVersion.Version.Major -gt 5) -and
-     [hacks.aero]::DwmIsCompositionEnabled()) {
-
-   $hwnd = (get-process -id $pid).mainwindowhandle
-
-   $margin = new-object 'hacks.aero+margins'
-
-  $host.ui.RawUI.BackgroundColor = "black"
-   $host.ui.rawui.foregroundcolor = "white"
-
-  if ($Disable) {
-
-      $margin.top = 0
-       $margin.left = 0
-
-
-   } else {
-
-      $margin.top = -1
-       $margin.left = -1
-
-   }
-
-   [hacks.aero]::DwmExtendFrameIntoClientArea($hwnd, [ref]$margin)
-
-} else {
-
-   write-warning "Aero is either not available or not enabled on this workstation."
-
+# Chocolatey profile
+$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+if (Test-Path($ChocolateyProfile)) {
+  Import-Module "$ChocolateyProfile"
 }
 
-#Let's Make the Shell Look Good!#
-$a = (Get-Host).UI.RawUI
-$a.ForegroundColor = "green"
-$a.BackgroundColor = "black"
-Clear-Host
-$host.PrivateData.ErrorBackgroundColor = "red"
-$host.PrivateData.ErrorForegroundColor = "white"
-$Host.PrivateData.WarningBackgroundColor = "Black"
-$host.PrivateData.WarningForegroundColor = "red"
-$Host.PrivateData.VerboseBackgroundColor = "White"
-$host.PrivateData.VerboseForegroundColor = "black"
-$maxWS = $host.UI.RawUI.Get_MaxWindowSize()
- $ws = $host.ui.RawUI.WindowSize
- IF($maxws.width -ge 85)
-   { $ws.width = 120 }
- ELSE { $ws.height = $maxws.height }
- IF($maxws.height -ge 42)
-   { $ws.height = 48 }
- ELSE { $ws.height = $maxws.height }
- $host.ui.RawUI.Set_WindowSize($ws)
-[console]::BufferHeight=3000
-[console]::BufferWidth=120
-[console]::Title="Custom Engineering Monster Shell"
+# Setup Alias below
+function ls_alias { wsl ls --color=auto -hF $args }
+Set-Alias -Name ls -Value ls_alias -Option AllScope
 
-                # *** END OF SHELL CUSTOMIZATION *** #
+oh-my-posh --init --shell pwsh --config C:\Users\CURRENTUSER\Documents\WindowsPowerShell/jandedobbeleer.omp.json | Invoke-Expression
+
+# Custom Alias Setup Below
+Set-Alias -Name k -Value kubectl -Description "kubectl - or K8s Control Executable"
+Set-Alias -Name gpod -Value 'k get pod' -Description "Use kubectl to list Pods"
+Set-Alias -Name grs -Value 'kubectl get rs' -Description "Get K8s Replication Sets"
+Set-Alias -Name kdeploy -Value 'kubectl -f apply' -Description "Runs k8s -f apply - provide a yaml file to deploy it"
+Set-Alias -Name pm -Value podman -Description "Alias for the Podman executable"
+Set-Alias -Name d -Value docker -Description "Docker Executable Alias"
+
+#Autocomplete in Pshell code start
+
+# Shows navigable menu of all options when hitting Tab
+Set-PSReadlineKeyHandler -Chord Tab -Function MenuComplete
+
+# Autocompletion for arrow keys
+Set-PSReadlineKeyHandler -Chord UpArrow -Function HistorySearchBackward
+Set-PSReadlineKeyHandler -Chord DownArrow -Function HistorySearchForward
 
 # Custom Alias #
 
 # LOAD CUSTOM MODULES AND SCRIPTS #
 
 # Berkshelf #
-chef shell-init powershell | Invoke-Expression
-$env:BERKSHELF_PATH="C:\working\berkshelf"
+#chef shell-init powershell | Invoke-Expression
+#$env:BERKSHELF_PATH="C:\working\berkshelf"
 
 # Load Posh-Git #
 $ModPath = $env:PSModulePath.split(";")[0]
@@ -120,16 +75,23 @@ if ((Get-Module posh-git -ListAvailable).count -eq 1) {
    }
 }
 
-# Cowsay #
-"$PSScriptRoot\lib\cowsay.ps1"
+# Get and Show Data for FastFetch (IF YOU DO NOT HAVE FASTFETCH INSTALLED, IT WILL NOT WORK)
+# Install FastFetch using WinGet | winget install fastfetch
+# Install FastFetch with Scoop |  scoop install fastfetch
+# https://github.com/fastfetch/fastfetch
+#fastfetch
+
+function Invoke-Starship-PreCommand {
+    $host.ui.Write("🚀")
+}
+# edit $PROFILE
+function Invoke-Starship-PreCommand {
+  $host.ui.RawUI.WindowTitle = "$env:USERNAME@$env:COMPUTERNAME`: $pwd `a"
+}
+Invoke-Expression (&starship init powershell)
 
 ##############################################################################
-##
 ## Get-FileHash
-##
-## From Windows PowerShell Cookbook (O'Reilly)
-## by Lee Holmes (http://www.leeholmes.com/guide)
-##
 ##############################################################################
 
 <#
@@ -187,7 +149,7 @@ else
 }
 
 ## Go through each of the items in the list of input files
-foreach($file in $files)
+foreach ($file in $files)
 {
     ## Skip the item if it is not a file
     if(-not (Test-Path $file -Type Leaf)) { continue }
@@ -552,7 +514,7 @@ function git-pull-all {
    sl $CurDir
 }
 
-function apool-reset { $env:SERVER = Read-Host -Prompt 'Input $Server Name'
+function appool-reset { $env:SERVER = Read-Host -Prompt 'Input $Server Name'
 #write-host $env:SERVER
 invoke-command -cn $env:SERVER -script {
 $inst = $args[0]
@@ -588,8 +550,7 @@ function Save-TinyUrlFile
     }
 }
 
-# Credit for Gitit goes to Kirk Janzter (JHall converted to function)
-# Kirk.Janzter@blackline.com | Jeremy.Hall@Blackline.com | Cheers!
+# Add gitit code - use to quickly submit code with proper formatting
 ######################################################################
 function gitit {
   write-host "Write Your Commit Message" -ForegroundColor Black -BackgroundColor White
@@ -599,28 +560,39 @@ git commit -m  $comment;
 git push origin master
 }
 
-# Credit for Blackline ASCII Logo & Text to Jeremy.Hall@Blackline.com
+# Credit for info - myself. duh.
 #####################################################################
 
-function header{
-    $Env:HeaderSubtext = 'String'
-    write-host 'o-----------------------/'
-    write-host 'o--------------------:+sh'
-    write-host 'o----------------::oyho//'
-    write-host '+--------------:ohds/---/'
-    write-host "o-----------:+hmh+:-----/`t`t______ _            _    _     _            "
-    write-host "my/:------:sdms/-----:/sh`t`t| ___ \ |          | |  | |   (_)           "
-    write-host "yhNh+:--/ymmo:----:/shs+/`t`t| |_/ / | __ _  ___| | _| |    _ _ __   ___ "
-    write-host "o-+dNdohNmo:----:ohh+:--/`t`t| ___ \ |/ _``|/ __| |/ / |   | | '_ \ / _ \"
-    write-host "o--:yMMMh:----:sdy/----:+`t`t| |_/ / | (_| | (__|   <| |___| | | | |  __/"
-    write-host "s-/hNNhNNy:-:yds:----/sys`t`t\____/|_|\__,_|\___|_|\_\_____/_|_| |_|\___|"
-    write-host 'NhNMd/-/mMmymy:---:ohs/:/'
-    write-host "MMMm:---:mMMd:--:odo:---/`t`t`t         '$HeaderSubtext'"
-    write-host 'MNmMd:-/dMdMMm/+my:-----/'
-    write-host 'N+/mMNsNMo:yMMMN+:::::::+'
-    write-host ""
-    write-host ""
-    }
+[Cmdletbinding()] 
+Param( 
+    [string]$Computername = "$"
+) 
+cls 
+
+Write-Host "Logged in User:"
+whoami
+
+$PysicalMemory = Get-WmiObject -class "win32_physicalmemory" -namespace "root\CIMV2" -ComputerName $Computername 
+ 
+Write-Host "Memore Modules:" -ForegroundColor Green 
+$PysicalMemory | Format-Table Tag,BankLabel,@{n="Capacity(GB)";e={$_.Capacity/1GB}},Manufacturer,PartNumber,Speed -AutoSize 
+ 
+Write-Host "Total Memory:" -ForegroundColor Green 
+Write-Host "$((($PysicalMemory).Capacity | Measure-Object -Sum).Sum/1GB)GB" 
+ 
+$TotalSlots = ((Get-WmiObject -Class "win32_PhysicalMemoryArray" -namespace "root\CIMV2" -ComputerName $Computername).MemoryDevices | Measure-Object -Sum).Sum 
+Write-Host "`nTotal Memory Slots:" -ForegroundColor Green 
+Write-Host $TotalSlots 
+ 
+$UsedSlots = (($PysicalMemory) | Measure-Object).Count  
+Write-Host "`nUsed Memory Slots:" -ForegroundColor Green 
+Write-Host $UsedSlots 
+ 
+If($UsedSlots -eq $TotalSlots)
+{ 
+    Write-Host "All memory slots are in use. No available slots!" -ForegroundColor Yellow 
+} 
+
 
 # Load External Modules! #
 
