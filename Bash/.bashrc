@@ -205,7 +205,7 @@ alias reload='source ~/.bashrc'
 # System Information:
 #------------------------------------------////
 clear
-echo -e "${LIGHTGRAY}";figlet "Blackline";
+echo -e "${LIGHTGRAY}";figlet "INSERT_TEXT_HERE";
 echo -ne "${red}Today is:\t\t${cyan}" `date`; echo ""
 echo -e "${red}Kernel Information: \t${cyan}" `uname -smr`
 echo -e "${cyan}"; cal -3
