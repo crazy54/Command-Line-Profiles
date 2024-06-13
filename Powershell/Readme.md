@@ -1,11 +1,10 @@
-# JHall's Engineering Monster Shell
-<p style="text-align: center;"> ** Use this Profile to Up Your Game! ** </p>
+# JHall's Engineering Shell
 
-**Abstract:** This is just my Powershell profile that I have been using on and off for the last few years. It contains lots of helpful Functions to help make your life easier.  Most all of the functions have their help in the .ps1 so you may have to open it to get the syntax.
+
+## About
+Contained within this profile is a magical world of... nothing. I do not use pshell anymore but I keep updated with it just in case. LINUX FTW. Go look at that .zsh config. It is way better than this. Although I have written some good functions if you need them. 
 
 ## Installation
-
-![Install Location](http://image.prntscr.com/image/e18ce7d3f61942c68ff3c2b6ed163853.png)
 
 To install this for your user, make a directory called **WindowsPowerShell** in your *Documents* folder.  This is now your root profile directory. Please make sure you place the lib folder inside as well or you will have errors when you launch PowerShell.
 
