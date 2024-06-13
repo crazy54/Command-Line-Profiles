@@ -14,7 +14,7 @@ if (Test-Path($ChocolateyProfile)) {
 function ls_alias { wsl ls --color=auto -hF $args }
 Set-Alias -Name ls -Value ls_alias -Option AllScope
 
-oh-my-posh --init --shell pwsh --config C:\Users\CURRENTUSER\Documents\WindowsPowerShell/jandedobbeleer.omp.json | Invoke-Expression
+oh-my-posh --init --shell pwsh --config C:\Users\%USERNAME%\Documents\WindowsPowerShell/jandedobbeleer.omp.json | Invoke-Expression
 
 # Custom Alias Setup Below
 Set-Alias -Name k -Value kubectl -Description "kubectl - or K8s Control Executable"
